@@ -55,9 +55,12 @@ local winopts = {
 local bufopts = {
 	buftype = "terminal",
 	filetype = "nnn",
+	-- does not seem to take effect, so will not set
+	-- bufhidden = "wipe",
+	buflisted = false,
 }
 
--- Close nnn window(keeping buffer) and create new buffer if none left
+-- Toggle between closing nnn window and removing buffer, and creating new buffer if none left
 local function close(mode, tab)
 	if api.nvim_win_get_buf(state[mode][tab].win) ~= state[mode][tab].buf then
 		api.nvim_win_set_buf(state[mode][tab].win, state[mode][tab].buf)
@@ -67,7 +70,7 @@ local function close(mode, tab)
 	if #api.nvim_tabpage_list_wins(0) == 1 then
 		api.nvim_win_set_buf(state[mode][tab].win, api.nvim_create_buf(false, false))
 	else
-		api.nvim_win_hide(state[mode][tab].win)
+		api.nvim_buf_delete(state[mode][tab].buf, { force = true })
 	end
 
 	state[mode][tab].win = nil
@@ -143,7 +146,7 @@ end
 
 -- on_exit callback for termopen
 local function on_exit(id, code)
-	local tabpage, win
+	local tabpage, win, buf
 	local mode = state.picker[1] and state.picker[1].id == id and "picker" or "explorer"
 
 	if mode == "picker" then
@@ -154,6 +157,7 @@ local function on_exit(id, code)
 			if nstate.id == id then
 				tabpage = tab
 				win = nstate.win
+				buf = nstate.buf
 				break
 			end
 		end
@@ -169,6 +173,10 @@ local function on_exit(id, code)
 				cmd("split")
 			end
 			api.nvim_win_hide(win)
+		end
+
+		if api.nvim_buf_is_valid(buf + 1) then
+			api.nvim_buf_delete(buf + 1, { force = true })
 		end
 
 		if mode == "picker" then
