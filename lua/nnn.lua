@@ -175,6 +175,10 @@ local function on_exit(id, code)
 			api.nvim_win_hide(win)
 		end
 
+		-- for some reason the plugin creates an additional
+		-- "term://... -G -F1" when running
+		-- this is probably related with fn.termopen which is used
+		-- to spawn the nnn process
 		if api.nvim_buf_is_valid(buf + 1) then
 			api.nvim_buf_delete(buf + 1, { force = true })
 		end
