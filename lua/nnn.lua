@@ -80,6 +80,7 @@ end
 local function handle_files(iter)
 	local files = {}
 	local empty, notnnn
+	local curwin = api.nvim_get_current_win()
 
 	if not targetwin.win then -- find window containing empty or non-nnn buffer
 		for _, win in pairs(api.nvim_tabpage_list_wins(0)) do
@@ -114,6 +115,9 @@ local function handle_files(iter)
 			action = nil
 		end)
 	end
+
+	api.nvim_set_current_win(curwin)
+
 end
 
 -- Read fifo for explorer asynchronously with vim.loop
