@@ -92,13 +92,14 @@ local function handle_files(iter)
 				break
 			end
 
-			if api.nvim_buf_get_option(0, "filetype") ~= "nnn" then
+			if api.nvim_buf_get_option(api.nvim_win_get_buf(win), "filetype") ~= "nnn" then
 				notnnn = win
+				break
 			end
 		end
 
 		if not empty and not notnnn then -- create new win
-			cmd(oppside..api.nvim_get_option("columns") - cfg.explorer.width.."vsplit")
+			cmd(oppside..api.nvim_get_option("columns") - cfg.explorer.width.."vnew")
 		end
 	end
 
@@ -109,6 +110,7 @@ local function handle_files(iter)
 			files[#files + 1] = fn.fnameescape(file)
 		else
 			cmd("edit "..fn.fnameescape(file))
+			api.nvim_set_current_win(curwin)
 		end
 	end
 
@@ -119,7 +121,6 @@ local function handle_files(iter)
 		end)
 	end
 
-	api.nvim_set_current_win(curwin)
 
 end
 
