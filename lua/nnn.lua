@@ -77,6 +77,7 @@ end
 local function handle_files(iter)
 	local files = {}
 	local empty, notnnn
+	local curwin = api.nvim_get_current_win()
 	local _, targetwintab = pcall(api.nvim_win_get_tabpage, targetwin.win)
 	 -- find window containing empty or non-nnn buffer
 	if not targetwin.win or targetwintab ~= api.nvim_get_current_tabpage() then
