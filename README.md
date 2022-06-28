@@ -110,8 +110,12 @@ local cfg = {
 	mappings = {},       -- table containing mappings, see below
 	windownav = {        -- window movement mappings to navigate out of nnn
 		left = "<C-w>h",
-		right = "<C-w>l"
+		right = "<C-w>l",
+		next = "<C-w>w",
+		prev = "<C-w>W",
 	},
+	buflisted = false,   -- wether or not nnn buffers show up in the bufferlist
+	quitcd = "tcd",      -- or "cd" / "lcd", command to run if quitcd file is found
 }
 ```
 
@@ -125,7 +129,7 @@ require("nnn").setup({
 		session = "shared",
 	},
 	replace_netrw = "picker",
-	window_nav = "<C-l>"
+	windownav = "<C-l>"
 })
 ```
 
@@ -159,7 +163,7 @@ Alternatively you can set the session `"shared"` to share the same session betwe
 
 ### Colors
 
-Three highlight groups `NnnNormal`, `NnnNormalNC` and `NnnFloatBorder` are available to configure the colors for the active, inactive and picker window borders respectively.
+Three highlight groups `NnnNormal`, `NnnNormalNC` and `NnnBorder` are available to configure the colors for the active, inactive and picker window borders respectively.
 
 ## Tips and tricks
 
