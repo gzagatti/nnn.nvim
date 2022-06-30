@@ -17,6 +17,7 @@ local explorertmp = fn.tempname().."-explorer"
 local nnnopts = os.getenv("NNN_OPTS")
 local nnntmpfile = os.getenv("NNN_TMPFILE") or
 		(os.getenv("XDG_CONFIG_HOME") or os.getenv("HOME").."/.config").."/nnn/.lastd"
+local tmpdir = os.getenv("TMPDIR") or "/tmp"
 local term = os.getenv("TERM")
 local exploreropts = nnnopts and nnnopts:gsub("a", "") or ""
 
@@ -45,6 +46,7 @@ local cfg = {
 	windownav = { left = "<C-w>h", right = "<C-w>l", next = "<C-w>w", prev = "<C-w>W" },
 	buflisted = false,
 	quitcd = "tcd",
+	offset = false,
 }
 
 local winopts = {
@@ -286,6 +288,14 @@ local function get_win_size()
 	wincfg.row = min(max(0, row), vim_height - wincfg.height)
 	wincfg.col = min(max(0, col), vim_width - wincfg.width)
 
+	if cfg.offset then
+		local file = io.open(tmpdir.."/nnn-preview-tui-posoffset", "w")
+		if file then
+			file:write((wincfg.col + 1).." "..(wincfg.row + 1).."\n")
+			file:close()
+		end
+	end
+
 	return wincfg
 end
 
@@ -358,9 +368,9 @@ function M.toggle(mode, dir, auto)
 	if win and api.nvim_win_is_valid(win) then
 		close(mode, tab)
 	elseif mode == "explorer" then
-		if nnnver < 4.3 then
+		if not nnnver or nnnver < 4.3 then
 			print("NnnExplorer requires nnn version >= v4.3. Currently installed: "..
-					((nnnver ~= 0) and ("v"..nnnver) or "none"))
+					(nnnver and ("v"..nnnver) or "none"))
 			return
 		end
 
@@ -492,7 +502,7 @@ function M.setup(setup_cfg)
 
 	-- Version check for explorer mode
 	local verfd = io.popen("nnn -V")
-	nnnver = tonumber(verfd:read()) or 0
+	nnnver = verfd and tonumber(verfd:read())
 	verfd:close()
 
 	-- Setup sessionfile name and remove on exit
@@ -575,8 +585,8 @@ function M.setup(setup_cfg)
 			require("nnn").vim_resized()
 		end
 	end})
-	api.nvim_create_autocmd("TabClosed", { group = group, callback = function()
-		require("nnn").tab_closed(tonumber(vim.fn.expand("<afile>")))
+	api.nvim_create_autocmd("TabClosed", { group = group, callback = function(args)
+		require("nnn").tab_closed(tonumber(args.file))
 	end})
 
 	api.nvim_set_hl(0, "NnnBorder", { link = "FloatBorder", default = true })
